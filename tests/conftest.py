@@ -1,5 +1,8 @@
+from playwright.sync_api import expect
 import pytest
 import requests
+from pages.login_page import LoginPage
+from pages.overview_page import OverviewPage
 
 BASE = "https://parabank.parasoft.com/parabank/services/bank"
 
@@ -13,3 +16,12 @@ def api():
 @pytest.fixture(scope="session")
 def api_base_url():
     return BASE
+
+@pytest.fixture
+def overview(page):
+    login_page = LoginPage(page)
+    login_page.open()
+    login_page.login("john", "demo")
+    overview = OverviewPage(page)
+    expect(overview.heading).to_be_visible()
+    return overview

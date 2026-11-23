@@ -20,12 +20,7 @@ def test_login_with_wrong_password_shows_error(page:Page):
     login_page.login("john", "pass")
     expect(page.locator("#rightPanel")).to_contain_text("The username and password could not be verified")
 
-def test_logout_returns_to_login_page(page:Page):
-    login_page = LoginPage(page)
-    login_page.open()
-    login_page.login("john", "demo")
-    overview = OverviewPage(page)
-    expect(overview.heading).to_be_visible()
+def test_logout_returns_to_login_page(overview, page):
     overview.log_out()
     expect(page.locator("#leftPanel")).to_contain_text("Customer Login")
 
