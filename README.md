@@ -21,6 +21,7 @@ Pytest tests for the [Parabank](https://parabank.parasoft.com) demo bank, on two
 - Every account the API returns appears on the Accounts Overview page.
 - The greeting shows the customer name the API returns.
 - An account's details page shows the same account type as the API.
+- A transfer made through the UI moves both balances by exactly the amount, verified through the API before and after
 
 ## Known issues (by design: xfail)
 - For customer id "0" and "99999999" Parabank returns code 400.
@@ -32,6 +33,8 @@ Pytest tests for the [Parabank](https://parabank.parasoft.com) demo bank, on two
 - **Exact for values, contains for containers.** Single values (an account id or type) are checked exactly; page sections are checked with "contains".
 - **Same tests, any browser.** Browser settings come from the command line, not the code. CI runs headless with the Chrome preinstalled on Ubuntu, so a full run takes about 30 seconds.
 - **Page objects.** Each page has a class in `pages/` that holds its locators and actions (`LoginPage`, `OverviewPage`, `AccountDetailsPage`). Tests press their buttons and do all the asserting, so a change on the website is fixed in one place.
+- **Act in one layer, verify in the other.** UI actions are confirmed through the API, so the UI never grades itself.
+- **Tests start where they need to.** An overview fixture logs in through LoginPage, so only the login tests log in by hand.
 
 ## Project structure:
 parabank-tests/
@@ -42,6 +45,7 @@ parabank-tests/
 ├── pages/                         # page objects: locators and actions, no asserts
 │   ├── login_page.py
 │   ├── overview_page.py
+    ├── transfer_funds_page_page.py
 │   └── account_details_page.py
 └── tests/
     ├── conftest.py                # shared fixtures: api session, api_base_url

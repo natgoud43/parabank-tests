@@ -5,6 +5,7 @@ class OverviewPage:
         self.page = page
         self.heading = page.get_by_role("heading", name="Accounts Overview")
         self.account_links = page.locator("#accountTable a")
+        self.transfer_funds = page.get_by_role("link", name="Transfer Funds")
         self.greeting = page.locator("#leftPanel")
 
     def account_ids(self):
@@ -13,6 +14,9 @@ class OverviewPage:
 
     def open_account(self, account_id):
         self.page.get_by_role("link", name=str(account_id), exact=True).click()
+
+    def go_to_transfer_funds(self):
+        self.transfer_funds.click()
 
     def log_out(self):
         self.page.get_by_role("link", name="Log Out").click()
