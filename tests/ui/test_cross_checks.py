@@ -5,6 +5,8 @@ from pages.account_details_page import AccountDetailsPage
 from pages.transfer_funds_page import TransferFundsPage
 import pytest
 
+pytestmark = pytest.mark.ui
+
 def test_ui_shows_all_accounts_from_api(overview, api, api_base_url):
     response = api.get(f"{api_base_url}/customers/12212/accounts")
     assert response.status_code == 200 

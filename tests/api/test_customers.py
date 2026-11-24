@@ -1,5 +1,7 @@
 import pytest
 
+pytestmark = pytest.mark.api
+
 def test_customer_has_expected_name(api, api_base_url):
     response = api.get(f"{api_base_url}/customers/12212")
     assert response.status_code == 200
