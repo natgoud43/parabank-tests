@@ -18,11 +18,18 @@ jobs:
         run:  pip install -r requirements.txt
         
       - name: Run the suite
-        run: python -m pytest --browser-channel chrome --junitxml=results.xml
+        run: >-
+          python -m pytest --browser-channel chrome
+          --screenshot only-on-failure --tracing retain-on-failure
+          --html=report.html --self-contained-html
+          --junitxml=results.xml
 
       - name: Save test results
-        if: always()                      # save them even if tests fail
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: test-results
-          path: results.xml
+          path: |
+            results.xml
+            report.html
+            test-results/

@@ -1,6 +1,8 @@
 class LoginPage:
     def __init__(self, page):
         self.page = page
+        self.error_message = page.locator("#rightPanel .error")
+        self.error_heading = page.get_by_role("heading", name="Error!")
 
     def open(self):
         self.page.goto("https://parabank.parasoft.com/parabank/index.htm")
