@@ -5,7 +5,20 @@ on:
   workflow_dispatch:    # adds a "Run workflow" button on GitHub
 
 jobs:
-  test:
+  api:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run API tests
+        run: python -m pytest -m api --junitxml=results-api.xml  
+
+  ui:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -16,10 +29,17 @@ jobs:
 
       - name: Install dependencies
         run:  pip install -r requirements.txt
+      
+      - name: Save API results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-results 
+          path: results-api.xml
         
-      - name: Run the suite
+      - name: Run UI tests
         run: >-
-          python -m pytest --browser-channel chrome
+          python -m pytest -m ui --browser-channel chrome
           --screenshot only-on-failure --tracing retain-on-failure
           --html=report.html --self-contained-html
           --junitxml=results.xml
