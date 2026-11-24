@@ -6,7 +6,7 @@ import pytest
 def test_login_with_valid_user_shows_accounts_overview(page: Page):
     login_page = LoginPage(page)
     login_page.open()
-    login_page.login("john", "pass")
+    login_page.login("john", "demo")
     overview = OverviewPage(page)
     expect(overview.heading).to_be_visible()
     
