@@ -1,6 +1,5 @@
 from playwright.sync_api import expect
-import pytest
-import requests
+import pytest, requests, uuid
 from pages.login_page import LoginPage
 from pages.overview_page import OverviewPage
 
@@ -34,3 +33,7 @@ def existing_account_id(api, api_base_url):
     assert body
     account_id = body[0]["id"]
     return account_id
+
+@pytest.fixture
+def new_username():
+    return f"qa_{uuid.uuid4().hex[:8]}"
