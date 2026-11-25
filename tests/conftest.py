@@ -25,3 +25,12 @@ def overview(page):
     overview = OverviewPage(page)
     expect(overview.heading).to_be_visible()
     return overview
+
+@pytest.fixture
+def existing_account_id(api, api_base_url):
+    response = api.get(f"{api_base_url}/customers/12212/accounts/")
+    assert response.status_code == 200
+    body = response.json()
+    assert body
+    account_id = body[0]["id"]
+    return account_id

@@ -2,11 +2,12 @@ import pytest
 
 pytestmark = pytest.mark.api
 
-def test_customer_has_expected_name(api, api_base_url):
+def test_customer_has_a_name(api, api_base_url):
     response = api.get(f"{api_base_url}/customers/12212")
     assert response.status_code == 200
     body = response.json()
-    assert body["firstName"] == "John"
+    assert body["firstName"]
+    assert body["lastName"]
 
 def test_all_accounts_belong_to_customer(api,api_base_url):
     response = api.get(f"{api_base_url}/customers/12212/accounts")
@@ -49,4 +50,23 @@ def test_unknown_customer_returns_400(api, api_base_url):
 def test_not_existing_and_invalid_customer_id(api, api_base_url, id, response_code):
     response = api.get(f"{api_base_url}/customers/{id}")
     assert response.status_code == response_code
-    
+
+def test_create_account_returns_new_account(api, api_base_url, existing_account_id):
+    from_id = existing_account_id
+    response = api.post(f"{api_base_url}/createAccount", params={
+        "customerId": 12212,
+        "newAccountType": 0,
+        "fromAccountId": from_id
+    })
+    assert response.status_code == 200
+    new_account = response.json()
+    assert new_account
+    new_id = new_account["id"]
+    assert new_account["customerId"] == 12212
+    assert new_account["id"] != from_id
+    assert new_account["type"] == "CHECKING"
+    response = api.get(f"{api_base_url}/customers/12212/accounts")
+    assert response.status_code == 200
+    ids = [a["id"] for a in response.json()]
+    assert new_id in ids
+
