@@ -1,5 +1,8 @@
 from playwright.sync_api import expect
 from pages.register_page import RegisterPage
+import pytest
+
+pytestmark = pytest.mark.ui
 
 def test_register_new_customer_shows_welcome(page, new_username):
     register_page = RegisterPage(page)
