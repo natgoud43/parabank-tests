@@ -41,6 +41,7 @@ Pytest tests for the [Parabank](https://parabank.parasoft.com) demo bank, on two
 - **Page objects.** Each page has a class in `pages/` that holds its locators and actions (`LoginPage`, `OverviewPage`, `AccountDetailsPage`). Tests press their buttons and do all the asserting, so a change on the website is fixed in one place.
 - **Act in one layer, verify in the other.** UI actions are confirmed through the API, so the UI never grades itself.
 - **Tests start where they need to.** An overview fixture logs in through LoginPage, so only the login tests log in by hand.
+- **Its own test user.** Each run registers a fresh customer once (session fixture), and tests that need money create their own accounts through the API, so every test passes alone and in any order.
 
 ## Project structure:
 parabank-tests/

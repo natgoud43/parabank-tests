@@ -5,7 +5,7 @@ import pytest
 
 pytestmark = pytest.mark.ui
 
-def test_login_with_valid_user_shows_accounts_overview(page: Page):
+def test_login_with_valid_user_shows_accounts_overview(page):
     login_page = LoginPage(page)
     login_page.open()
     login_page.login("john", "demo")
