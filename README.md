@@ -11,6 +11,7 @@ Pytest tests for the [Parabank](https://parabank.parasoft.com) demo bank, on two
 - Account details follow the rules: correct id and customer, and a known account type.
 - A customer's address has all its fields (street, city, state, zipCode).
 - Unknown customer ids return 404 (expected by REST convention; see Known issues); -1 returns 400; a non-numeric id returns 404
+- Creating an account via the API returns a new CHECKING account, which appears in the customer's account list
 
 ### UI (`tests/ui`)
 - Logging in with a valid user shows Accounts Overview.
@@ -22,6 +23,7 @@ Pytest tests for the [Parabank](https://parabank.parasoft.com) demo bank, on two
 - The greeting shows the customer name the API returns.
 - An account's details page shows the same account type as the API.
 - A transfer made through the UI moves both balances by exactly the amount, verified through the API before and after
+- A new account created via the API appears on the Accounts Overview page
 
 ## Known issues (by design: xfail)
 - For customer id "0" and "99999999" Parabank returns code 400.

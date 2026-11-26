@@ -64,3 +64,20 @@ def test_transfer_in_ui_moves_balances_in_api(overview, page, api, api_base_url)
     assert account_from_after == pytest.approx(account_from_balance - 10)
     assert account_to_after == pytest.approx(account_to_balance + 10)
 
+def test_new_account_exists_in_ui(api, api_base_url, page, overview, existing_account_id):
+    from_id = existing_account_id
+    response = api.post(f"{api_base_url}/createAccount", params={
+        "customerId": 12212,
+        "newAccountType": 0,
+        "fromAccountId": from_id
+    })
+    assert response.status_code == 200
+    new_account = response.json()
+    assert new_account
+    new_id = new_account["id"]
+    page.reload()
+    ui_ids = overview.account_ids()
+    assert str(new_id) in ui_ids
+
+
+

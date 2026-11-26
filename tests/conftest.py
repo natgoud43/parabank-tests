@@ -1,6 +1,5 @@
 from playwright.sync_api import expect
-import pytest
-import requests
+import pytest, requests, uuid
 from pages.login_page import LoginPage
 from pages.overview_page import OverviewPage
 
@@ -25,3 +24,16 @@ def overview(page):
     overview = OverviewPage(page)
     expect(overview.heading).to_be_visible()
     return overview
+
+@pytest.fixture
+def existing_account_id(api, api_base_url):
+    response = api.get(f"{api_base_url}/customers/12212/accounts/")
+    assert response.status_code == 200
+    body = response.json()
+    assert body
+    account_id = body[0]["id"]
+    return account_id
+
+@pytest.fixture
+def new_username():
+    return f"qa_{uuid.uuid4().hex[:8]}"
