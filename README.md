@@ -28,6 +28,9 @@ Pytest tests for the [Parabank](https://parabank.parasoft.com) demo bank, on two
 ## Known issues (by design: xfail)
 - For customer id "0" and "99999999" Parabank returns code 400.
 
+## Findings
+- Lookups of non-existent customers return 400 instead of 404; the server log shows the error handler itself failing ("An unexpected error occurred during error handling") and logging an expected "not found" as an ERROR with a stack trace.
+
 ## Design notes
 - **Its own server in CI.** Each CI job starts a private Parabank from the official Docker image, waits until it answers, and seeds known demo data, so results never depend on the shared public site.
 - **One address setting.** All tests read the server address from base_url (the public site by default, localhost in CI).
