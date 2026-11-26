@@ -17,7 +17,7 @@ class RegisterPage:
         self.success_panel = page.locator("#rightPanel")
 
     def open(self):
-        self.page.goto("https://parabank.parasoft.com/parabank/register.htm")
+        self.page.goto("register.htm")
 
     def register(self, username, password):
         self.first_name.fill("Tester")
