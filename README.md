@@ -27,7 +27,6 @@ Pytest tests for the [Parabank](https://parabank.parasoft.com) demo bank, on two
 
 ## Known issues (by design: xfail)
 - For customer id "0" and "99999999" Parabank returns code 400.
-- Sometimes wrong password returns "An internal error has occurred" instead of the login error (seen Nov 19; tracked as commented xfail).
 
 ## Design notes
 - **Its own server in CI.** Each CI job starts a private Parabank from the official Docker image, waits until it answers, and seeds known demo data, so results never depend on the shared public site.
@@ -61,6 +60,8 @@ parabank-tests/
 
 ## How to run
 
+> **Note about the public site:** parabank.parasoft.com is shared and sometimes unstable. Wrong-credential logins occasionally return "An internal error has occurred", and the site may block automated browsers. For reliable results, run against the Docker image (see "Run locally with Docker").
+
 ```
 pip install -r requirements.txt
 python -m pytest                                 # everything, headless
@@ -69,3 +70,13 @@ python -m pytest tests/ui --headed --slowmo 500  # watch the browser
 ```
 
 On Windows with Smart App Control, add `--browser-channel chrome` to use the installed, signed Chrome.
+
+## Run locally with Docker (recommended)
+
+The public Parabank site sometimes blocks automated browsers, so run a private copy:
+
+```
+docker run -d --name parabank -p 8080:8080 parasoft/parabank
+curl -X POST http://localhost:8080/parabank/services/bank/initializeDB
+python -m pytest --base-url http://localhost:8080/parabank/
+```
