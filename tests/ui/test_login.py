@@ -17,8 +17,8 @@ def test_logout_returns_to_login_page(overview, page):
     expect(page.locator("#leftPanel")).to_contain_text("Customer Login")
 
 @pytest.mark.parametrize("user, password, error", [
-    pytest.param("john", "wrong", "The username and password could not be verified.", marks=pytest.mark.xfail(strict=False,raises=AssertionError, reason="Intermittent Parabank error handling")),
-    pytest.param("nobody12", "demo", "The username and password could not be verified.", marks=pytest.mark.xfail(strict=False,raises=AssertionError, reason="Intermittent Parabank error handling")),
+    ("john", "pass", "The username and password could not be verified."),
+    ("nobody12", "demo", "The username and password could not be verified."),
     ("", "", "Please enter a username and password."),
     ("john", "", "Please enter a username and password.")
 ], ids = ["wrong-password","wrong-username", "empty-username-password", "empty-password"]
