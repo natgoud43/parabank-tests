@@ -5,7 +5,7 @@ class LoginPage:
         self.error_heading = page.get_by_role("heading", name="Error!")
 
     def open(self):
-        self.page.goto("https://parabank.parasoft.com/parabank/index.htm")
+        self.page.goto("index.htm")
 
     def login(self, username, password):
         self.page.locator("input[name='username']").fill(username)

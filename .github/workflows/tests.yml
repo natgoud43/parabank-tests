@@ -4,10 +4,18 @@ on:
   push:                 # every push wakes the robot
   workflow_dispatch:    # adds a "Run workflow" button on GitHub
 
+env:
+  PARABANK_URL: http://localhost:8080/parabank/
+
 jobs:
   api:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    services:
+      parabank:
+        image: parasoft/parabank
+        ports:
+          - 8080:8080          # machine port : container port → reachable at localhost:8080
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
@@ -15,12 +23,30 @@ jobs:
           python-version: "3.13"
       - name: Install dependencies
         run: pip install -r requirements.txt
+      - name: Wait for Parabank
+        run: |
+          for i in $(seq 1 60); do
+            curl -sf ${{ env.PARABANK_URL }} > /dev/null && exit 0
+            sleep 2
+          done
+          echo "Parabank did not start in 2 minutes" && exit 1
       - name: Run API tests
-        run: python -m pytest -m api --junitxml=results-api.xml  
+        run: python -m pytest -m api --base-url ${{ env.PARABANK_URL }} --junitxml=results-api.xml
+      - name: Save API results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-results 
+          path: results-api.xml
 
   ui:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    services:
+      parabank:
+        image: parasoft/parabank
+        ports:
+          - 8080:8080          # machine port : container port → reachable at localhost:8080
     steps:
       - uses: actions/checkout@v6         # copy your repo onto the machine
       - uses: actions/setup-python@v6     # install Python
@@ -30,21 +56,22 @@ jobs:
       - name: Install dependencies
         run:  pip install -r requirements.txt
       
-      - name: Save API results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: api-results 
-          path: results-api.xml
+      - name: Wait for Parabank
+        run: |
+          for i in $(seq 1 60); do
+            curl -sf ${{ env.PARABANK_URL }}> /dev/null && exit 0
+            sleep 2
+          done
+          echo "Parabank did not start in 2 minutes" && exit 1
         
       - name: Run UI tests
         run: >-
-          python -m pytest -m ui --browser-channel chrome
+          python -m pytest -m ui --base-url ${{ env.PARABANK_URL }} --browser-channel chrome
           --screenshot only-on-failure --tracing retain-on-failure
           --html=report.html --self-contained-html
           --junitxml=results.xml
 
-      - name: Save test results
+      - name: Save UI results
         if: always()
         uses: actions/upload-artifact@v4
         with:
