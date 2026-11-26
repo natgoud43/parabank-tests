@@ -13,8 +13,8 @@ def api():
     session.close()
 
 @pytest.fixture(scope="session")
-def api_base_url():
-    return BASE
+def api_base_url(base_url):
+    return f"{base_url}services/bank"
 
 @pytest.fixture
 def overview(page):

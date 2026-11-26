@@ -30,6 +30,8 @@ Pytest tests for the [Parabank](https://parabank.parasoft.com) demo bank, on two
 - Sometimes wrong password returns "An internal error has occurred" instead of the login error (seen Nov 19; tracked as commented xfail).
 
 ## Design notes
+- **Its own server in CI.** Each CI job starts a private Parabank from the official Docker image, waits until it answers, and seeds known demo data, so results never depend on the shared public site.
+- **One address setting.** All tests read the server address from base_url (the public site by default, localhost in CI).
 - **Both layers read at the same moment.** Cross-checks call the API inside the test, right before checking the UI, so data changes on the shared server don't cause false failures.
 - **Test data comes from the API.** No hard-coded account ids: tests ask the API for a real account first, because accounts on the demo server come and go.
 - **Exact for values, contains for containers.** Single values (an account id or type) are checked exactly; page sections are checked with "contains".
