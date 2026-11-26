@@ -41,14 +41,29 @@ def new_username():
     return f"qa_{uuid.uuid4().hex[:8]}"
 
 @pytest.fixture(scope="session")
-def test_user(browser, base_url, api, api_base_url):
+def test_user(base_url, api, api_base_url):
     username = f"qa_{uuid.uuid4().hex[:8]}"
     password = "Tester12345"
-    page = browser.new_page(base_url=base_url)
-    register_page = RegisterPage(page)
-    register_page.open()
-    register_page.register(username, password)
-    page.close()
+    session = requests.Session()
+    session.get(f"{base_url}register.htm")                 # 1. open the page → receive the cookie 
+
+    form = {
+        "customer.firstName": username,
+        "customer.lastName": "Proud",
+        "customer.address.street": "Street str. 12",
+        "customer.address.city": "City",
+        "customer.address.state": "State",
+        "customer.address.zipCode": "123456",
+        "customer.phoneNumber": "8575645455",
+        "customer.ssn": "344556565",
+        "customer.username": username,
+        "customer.password": "Tester12345",
+        "repeatedPassword": "Tester12345"
+}
+    registration = session.post(f"{base_url}register.htm", data=form)
+    assert registration.status_code == 200
+    assert f"Welcome {username}" in registration.text
+    session.close()
 
     response = api.get(f"{api_base_url}/login/{username}/{password}")
     assert response.status_code == 200
