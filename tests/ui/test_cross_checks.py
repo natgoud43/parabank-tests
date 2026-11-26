@@ -7,8 +7,9 @@ import pytest
 
 pytestmark = pytest.mark.ui
 
-def test_ui_shows_all_accounts_from_api(overview, api, api_base_url):
-    response = api.get(f"{api_base_url}/customers/12212/accounts")
+def test_ui_shows_all_accounts_from_api(overview, api, api_base_url, test_user):
+    customer_id = test_user["customer_id"]
+    response = api.get(f"{api_base_url}/customers/{customer_id}/accounts")
     assert response.status_code == 200 
     api_ids = [str(account["id"]) for account in response.json()]
     assert api_ids
@@ -18,8 +19,9 @@ def test_ui_shows_all_accounts_from_api(overview, api, api_base_url):
     for account_id in api_ids:
         assert account_id in ui_ids
 
-def test_greeting_message_uses_correct_customer_name(api, api_base_url, overview):
-    response = api.get(f"{api_base_url}/customers/12212")
+def test_greeting_message_uses_correct_customer_name(api, api_base_url, overview, test_user):
+    customer_id = test_user["customer_id"]
+    response = api.get(f"{api_base_url}/customers/{customer_id}")
     assert response.status_code == 200
     body = response.json()
     assert body
@@ -28,8 +30,9 @@ def test_greeting_message_uses_correct_customer_name(api, api_base_url, overview
     expect(overview.greeting).to_contain_text("Welcome")
     expect(overview.greeting).to_contain_text(f" {customer_first_name} {customer_last_name}")
 
-def test_account_type_is_presented_correctly_in_ui(page:Page, overview, api, api_base_url):
-    response = api.get(f"{api_base_url}/customers/12212/accounts/")
+def test_account_type_is_presented_correctly_in_ui(page:Page, overview, api, api_base_url, test_user):
+    customer_id = test_user["customer_id"]
+    response = api.get(f"{api_base_url}/customers/{customer_id}/accounts/")
     assert response.status_code == 200
     body = response.json()
     assert body
@@ -42,15 +45,15 @@ def test_account_type_is_presented_correctly_in_ui(page:Page, overview, api, api
     expect(account_details.account_type).to_have_text(f"{account_type}")
 
 #known risk for this test - other activities can be performed on shared server on same time 
-def test_transfer_in_ui_moves_balances_in_api(overview, page, api, api_base_url):
-    response = api.get(f"{api_base_url}/customers/12212/accounts/")
+def test_transfer_in_ui_moves_balances_in_api(overview, page, api, api_base_url, test_user, existing_account_id, second_account_id):
+    customer_id = test_user["customer_id"]
+    response = api.get(f"{api_base_url}/customers/{customer_id}/accounts/")
     assert response.status_code == 200
     body = response.json()
     assert body
-    assert len(body) >= 2
-    account_from = body[0]["id"]
+    account_from = existing_account_id
     account_from_balance = api.get(f"{api_base_url}/accounts/{account_from}").json()["balance"]
-    account_to = body[1]["id"]
+    account_to = second_account_id
     account_to_balance = api.get(f"{api_base_url}/accounts/{account_to}").json()["balance"]
     overview.go_to_transfer_funds()
     transfer_page = TransferFundsPage(page)
@@ -64,10 +67,11 @@ def test_transfer_in_ui_moves_balances_in_api(overview, page, api, api_base_url)
     assert account_from_after == pytest.approx(account_from_balance - 10)
     assert account_to_after == pytest.approx(account_to_balance + 10)
 
-def test_new_account_exists_in_ui(api, api_base_url, page, overview, existing_account_id):
+def test_new_account_exists_in_ui(api, api_base_url, page, overview, existing_account_id, test_user):
+    customer_id = test_user["customer_id"]
     from_id = existing_account_id
     response = api.post(f"{api_base_url}/createAccount", params={
-        "customerId": 12212,
+        "customerId": customer_id,
         "newAccountType": 0,
         "fromAccountId": from_id
     })
@@ -78,6 +82,8 @@ def test_new_account_exists_in_ui(api, api_base_url, page, overview, existing_ac
     page.reload()
     ui_ids = overview.account_ids()
     assert str(new_id) in ui_ids
+
+
 
 
 
