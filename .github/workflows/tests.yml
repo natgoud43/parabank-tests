@@ -30,6 +30,10 @@ jobs:
             sleep 2
           done
           echo "Parabank did not start in 2 minutes" && exit 1
+
+      - name: Seed demo data
+        run: curl -sf -X POST ${{ env.PARABANK_URL }}services/bank/initializeDB
+
       - name: Run API tests
         run: python -m pytest -m api --base-url ${{ env.PARABANK_URL }} --junitxml=results-api.xml
       - name: Save API results
@@ -63,6 +67,9 @@ jobs:
             sleep 2
           done
           echo "Parabank did not start in 2 minutes" && exit 1
+
+      - name: Seed demo data
+        run: curl -sf -X POST ${{ env.PARABANK_URL }}services/bank/initializeDB
         
       - name: Run UI tests
         run: >-
@@ -75,7 +82,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-results
+          name: ui-results
           path: |
             results.xml
             report.html
