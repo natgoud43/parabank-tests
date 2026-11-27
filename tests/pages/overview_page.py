@@ -7,6 +7,7 @@ class OverviewPage:
         self.account_links = page.locator("#accountTable a")
         self.transfer_funds = page.get_by_role("link", name="Transfer Funds")
         self.greeting = page.locator("#leftPanel")
+        self.bill_pay = page.get_by_role("link", name="Bill Pay")
 
     def account_ids(self):
         expect(self.account_links.first).to_be_visible()
@@ -17,6 +18,9 @@ class OverviewPage:
 
     def go_to_transfer_funds(self):
         self.transfer_funds.click()
+
+    def go_to_bill_pay(self):
+        self.bill_pay.click()
 
     def log_out(self):
         self.page.get_by_role("link", name="Log Out").click()
