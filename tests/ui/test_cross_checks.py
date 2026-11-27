@@ -30,19 +30,14 @@ def test_greeting_message_uses_correct_customer_name(api, api_base_url, overview
     expect(overview.greeting).to_contain_text("Welcome")
     expect(overview.greeting).to_contain_text(f" {customer_first_name} {customer_last_name}")
 
-def test_account_type_is_presented_correctly_in_ui(page:Page, overview, api, api_base_url, test_user):
-    customer_id = test_user["customer_id"]
-    response = api.get(f"{api_base_url}/customers/{customer_id}/accounts/")
-    assert response.status_code == 200
-    body = response.json()
-    assert body
-    account_id = body[0]["id"]
-    account_type = body[0]["type"]
+def test_account_type_is_presented_correctly_in_ui(page, overview,first_account):
+    account_id = first_account["id"]
+    account_type = first_account["type"]
     overview.open_account(account_id)                           
     account_details = AccountDetailsPage(page)
     expect(account_details.heading).to_be_visible()
-    expect(account_details.account_id).to_have_text(f"{account_id}")
-    expect(account_details.account_type).to_have_text(f"{account_type}")
+    expect(account_details.account_id).to_have_text(str(account_id))
+    expect(account_details.account_type).to_have_text(str(account_type))
 
 #known risk for this test - other activities can be performed on shared server on same time 
 def test_transfer_in_ui_moves_balances_in_api(overview, page, api, api_base_url, test_user, existing_account_id, second_account_id):
