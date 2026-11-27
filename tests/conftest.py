@@ -84,3 +84,12 @@ def second_account_id(api, api_base_url, test_user, existing_account_id):
     assert new_account
     new_id = new_account["id"]
     return new_id
+
+@pytest.fixture
+def first_account(api, api_base_url, test_user):
+    customer_id = test_user["customer_id"]
+    response = api.get(f"{api_base_url}/customers/{customer_id}/accounts/")
+    assert response.status_code == 200
+    accounts = response.json()
+    assert accounts
+    return accounts[0]
