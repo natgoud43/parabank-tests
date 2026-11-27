@@ -1,6 +1,4 @@
 from playwright.sync_api import Page, expect
-from pages.login_page import LoginPage
-from pages.overview_page import OverviewPage
 from pages.account_details_page import AccountDetailsPage
 from pages.transfer_funds_page import TransferFundsPage
 import pytest

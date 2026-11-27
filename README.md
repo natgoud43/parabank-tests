@@ -24,6 +24,7 @@ Pytest tests for the [Parabank](https://parabank.parasoft.com) demo bank, on two
 - An account's details page shows the same account type as the API.
 - A transfer made through the UI moves both balances by exactly the amount, verified through the API before and after
 - A new account created via the API appears on the Accounts Overview page
+- A bill paid through the UI is confirmed by the API: the account balance drops by the amount, and exactly one matching "Bill Payment" debit appears in the account's transactions
 
 ## Known issues (by design: xfail)
 - For customer id "0" and "99999999" Parabank returns code 400.
@@ -42,26 +43,30 @@ Pytest tests for the [Parabank](https://parabank.parasoft.com) demo bank, on two
 - **Act in one layer, verify in the other.** UI actions are confirmed through the API, so the UI never grades itself.
 - **Tests start where they need to.** An overview fixture logs in through LoginPage, so only the login tests log in by hand.
 - **Its own test user.** Each run registers a fresh customer once (session fixture), and tests that need money create their own accounts through the API, so every test passes alone and in any order.
+- **Unique markers to find your own data.** Each bill payment uses a unique payee name, so the test can find exactly its own transaction among all of the account's transactions.
 
 ## Project structure:
 parabank-tests/
-├── .github/workflows/tests.yml
+├── .github/workflows/tests.yml    # two jobs (api, ui), each with its own Parabank in Docker
 ├── README.md
-├── pytest.ini
+├── pytest.ini                     # base_url, markers, addopts
 ├── requirements.txt
-├── pages/                         # page objects: locators and actions, no asserts
-│   ├── login_page.py
-│   ├── overview_page.py
-    ├── transfer_funds_page_page.py
-│   └── account_details_page.py
 └── tests/
-    ├── conftest.py                # shared fixtures: api session, api_base_url
+    ├── conftest.py                # fixtures: api session, test_user, accounts, overview
+    ├── pages/                     # page objects: locators and actions, no asserts
+    │   ├── login_page.py
+    │   ├── register_page.py
+    │   ├── overview_page.py
+    │   ├── account_details_page.py
+    │   ├── transfer_funds_page.py
+    │   └── bill_pay_page.py
     ├── api/
     │   └── test_customers.py
     └── ui/
         ├── test_login.py
-        └── test_cross_checks.py
-
+        ├── test_register.py
+        ├── test_cross_checks.py
+        └── test_bill_pay.py
 ## How to run
 
 > **Note about the public site:** parabank.parasoft.com is shared and sometimes unstable. Wrong-credential logins occasionally return "An internal error has occurred", and the site may block automated browsers. For reliable results, run against the Docker image (see "Run locally with Docker").
