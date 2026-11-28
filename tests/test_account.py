@@ -1,4 +1,3 @@
-import pytest
 from playwright.sync_api import expect
 from pages.account_details_page import AccountDetailsPage
 
