@@ -1,6 +1,7 @@
 from playwright.sync_api import Page, expect
 from pages.bill_pay_page import BillPayPage
 from pages.transfer_funds_page import TransferFundsPage
+from pages.account_details_page import AccountDetailsPage
 import pytest, uuid
 from helpers import get_balance, find_transactions
 
@@ -36,7 +37,7 @@ def test_bill_pay_in_ui_shows_in_api(overview, page, api, api_base_url, first_ac
     expect(bill_pay_page.success_heading).to_be_visible()
     expect(bill_pay_page.result_payee_name).to_have_text(str(payee_name))
     expect(bill_pay_page.result_from_account).to_have_text(str(from_id))
-    expect(bill_pay_page.result_amount).to_have_text(f"${amount}.00")
+    expect(bill_pay_page.result_amount).to_have_text(f"${amount:.2f}")
     account_from_after = get_balance(api, api_base_url, from_id)
     assert account_from_after == pytest.approx(balance - amount)
     mine = find_transactions(api, api_base_url, from_id, f"Bill Payment to {payee_name}")
@@ -84,4 +85,25 @@ def test_api_pay_bill_moves_the_amount_from_account_and_transaction_exists(api, 
     assert len(mine) == 1
     assert mine[0]["type"] == "Debit"
     assert mine[0]["amount"] == pytest.approx(amount)
+
+def test_deposit_funds_in_api_updates_account_in_ui(api, api_base_url, first_account, amount, overview, page):
+    account_id = first_account["id"]
+    balance = get_balance(api, api_base_url, account_id)
+    response = api.post(f"{api_base_url}/deposit", params={
+        "accountId": account_id,
+        "amount": amount
+    })
+    assert response.status_code == 200
+    expected = f"Successfully deposited ${amount} to account #{account_id}"
+    assert response.text == expected
+    assert get_balance(api, api_base_url, account_id) == pytest.approx(balance + amount)
+    overview.open_account(account_id)
+    account_details = AccountDetailsPage(page)
+    update = balance + amount
+    expect(account_details.account_balance).to_have_text(f"${update:.2f}")
+
+
+
+
+
 
