@@ -93,3 +93,13 @@ def first_account(api, api_base_url, test_user):
     accounts = response.json()
     assert accounts
     return accounts[0]
+
+def pytest_collection_modifyitems(items):
+    for item in items:                          # every test pytest collected
+        if "page" in item.fixturenames:         # does it need a browser (directly OR through a fixture)?
+            item.add_marker(pytest.mark.ui)
+        else:
+            item.add_marker(pytest.mark.api)
+   
+
+
