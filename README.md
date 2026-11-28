@@ -40,6 +40,8 @@ Pytest tests for the [Parabank](https://parabank.parasoft.com) demo bank, on two
 | --- | :-: | :-: | :-: |
 | A transfer in the UI moves both balances by exactly the amount | ✅ | ✅ | ✅ |
 | A bill paid in the UI lowers the balance, and exactly one matching debit appears | ✅ | ✅ | ✅ | 
+| A transfer via the API moves the amount between the two accounts| ✅ | | |
+| A bill paid via the API lowers the balance, and exactly one matching debit appears | ✅ | | |
 
 ## Known issues (by design: xfail)
 - For customer id "0" and "99999999" Parabank returns code 400.
@@ -61,6 +63,7 @@ Pytest tests for the [Parabank](https://parabank.parasoft.com) demo bank, on two
 - **Unique markers to find your own data.** Each bill payment uses a unique payee name, so the test can find exactly its own transaction among all of the account's transactions.
 - **Labels by what a test needs, applied automatically.** A conftest hook marks every test that needs a browser (directly or through a fixture) as `ui`, and every other test as `api`. CI runs the two labels as separate jobs. Markers are registered with `--strict-markers`, so a typo can't create a new label, and no test can end up unlabeled and silently skipped by both jobs.
 - **Grouped by feature.** Tests live in one file per feature (sign-in, customer, account, payment), so a reader finds a feature's API, UI and cross-checks in one place.
+- **Random amounts.** A fixture picks a random whole amount for each money test, so values vary between runs; failure messages always show the amount used.
 
 ## Project structure:
 parabank-tests/
@@ -70,7 +73,7 @@ parabank-tests/
 ├── requirements.txt
 └── tests/
     ├── conftest.py                # fixtures (api session, test_user, accounts, overview) + auto-labeling hook
-    ├── helpers.py                 # get_balance
+    ├── helpers.py                 # get_balance, find_transactions
     ├── pages/                     # page objects: locators and actions, no asserts
     │   ├── login_page.py
     │   ├── register_page.py

@@ -1,8 +1,7 @@
 from playwright.sync_api import expect
-import pytest, requests, uuid
+import pytest, requests, uuid, random
 from pages.login_page import LoginPage
 from pages.overview_page import OverviewPage
-from pages.register_page import RegisterPage
 
 BASE = "https://parabank.parasoft.com/parabank/services/bank"
 
@@ -100,6 +99,10 @@ def pytest_collection_modifyitems(items):
             item.add_marker(pytest.mark.ui)
         else:
             item.add_marker(pytest.mark.api)
+
+@pytest.fixture
+def amount():
+    return random.randint(10, 99)
    
 
 
