@@ -5,26 +5,41 @@ Pytest tests for the [Parabank](https://parabank.parasoft.com) demo bank, on two
 
 ## What the suite checks
 
-### API (`tests/api`)
-- An existing customer's details include the expected first name.
-- Every account returned for a customer belongs to that customer (customerId matches).
-- Account details follow the rules: correct id and customer, and a known account type.
-- A customer's address has all its fields (street, city, state, zipCode).
-- Unknown customer ids return 404 (expected by REST convention; see Known issues); -1 returns 400; a non-numeric id returns 404
-- Creating an account via the API returns a new CHECKING account, which appears in the customer's account list
+### Sign-in
 
-### UI (`tests/ui`)
-- Logging in with a valid user shows Accounts Overview.
-- A wrong password shows "The username and password could not be verified."
-- Log Out returns to the Customer Login form.
+| Check | API | UI | Cross-check |
+| --- | :-: | :-: | :-: |
+| A valid login shows Accounts Overview | | ✅ | |
+| Logout returns to the login page | | ✅ | |
+| Invalid credentials show the right error (wrong password, unknown user, empty fields) | | ✅ | |
+| Registering a new customer shows a personal welcome | | ✅ | |
 
-### Cross-layer checks (`tests/ui/test_cross_checks.py`)
-- Every account the API returns appears on the Accounts Overview page.
-- The greeting shows the customer name the API returns.
-- An account's details page shows the same account type as the API.
-- A transfer made through the UI moves both balances by exactly the amount, verified through the API before and after
-- A new account created via the API appears on the Accounts Overview page
-- A bill paid through the UI is confirmed by the API: the account balance drops by the amount, and exactly one matching "Bill Payment" debit appears in the account's transactions
+### Customer
+
+| Check | API | UI | Cross-check |
+| --- | :-: | :-: | :-: |
+| A customer has a first and last name | ✅ | | |
+| A customer's address has all fields | ✅ | | |
+| Unknown and invalid customer ids return the expected errors | ✅ | | |
+| The greeting shows the customer's name from the API | ✅ | ✅ | ✅ |
+
+### Accounts
+
+| Check | API | UI | Cross-check |
+| --- | :-: | :-: | :-: |
+| Every account belongs to its customer | ✅ | | |
+| Account details follow the rules (id, customer, known type) | ✅ | | |
+| Creating an account returns a new CHECKING account in the customer's list | ✅ | | |
+| Accounts Overview shows every account the API returns | ✅ | ✅ | ✅ |
+| An account's details page shows the API's type | ✅ | ✅ | ✅ |
+| An account created via the API appears in the UI | ✅ | ✅ | ✅ |
+
+### Payments
+
+| Check | API | UI | Cross-check |
+| --- | :-: | :-: | :-: |
+| A transfer in the UI moves both balances by exactly the amount | ✅ | ✅ | ✅ |
+| A bill paid in the UI lowers the balance, and exactly one matching debit appears | ✅ | ✅ | ✅ | 
 
 ## Known issues (by design: xfail)
 - For customer id "0" and "99999999" Parabank returns code 400.
@@ -44,15 +59,18 @@ Pytest tests for the [Parabank](https://parabank.parasoft.com) demo bank, on two
 - **Tests start where they need to.** An overview fixture logs in through LoginPage, so only the login tests log in by hand.
 - **Its own test user.** Each run registers a fresh customer once (session fixture), and tests that need money create their own accounts through the API, so every test passes alone and in any order.
 - **Unique markers to find your own data.** Each bill payment uses a unique payee name, so the test can find exactly its own transaction among all of the account's transactions.
+- **Labels by what a test needs, applied automatically.** A conftest hook marks every test that needs a browser (directly or through a fixture) as `ui`, and every other test as `api`. CI runs the two labels as separate jobs. Markers are registered with `--strict-markers`, so a typo can't create a new label, and no test can end up unlabeled and silently skipped by both jobs.
+- **Grouped by feature.** Tests live in one file per feature (sign-in, customer, account, payment), so a reader finds a feature's API, UI and cross-checks in one place.
 
 ## Project structure:
 parabank-tests/
-├── .github/workflows/tests.yml    # two jobs (api, ui), each with its own Parabank in Docker
+├── .github/workflows/tests.yml    # two CI jobs (api, ui), each with its own Parabank in Docker
 ├── README.md
-├── pytest.ini                     # base_url, markers, addopts
+├── pytest.ini                     # base_url, markers, --strict-markers
 ├── requirements.txt
 └── tests/
-    ├── conftest.py                # fixtures: api session, test_user, accounts, overview
+    ├── conftest.py                # fixtures (api session, test_user, accounts, overview) + auto-labeling hook
+    ├── helpers.py                 # get_balance
     ├── pages/                     # page objects: locators and actions, no asserts
     │   ├── login_page.py
     │   ├── register_page.py
@@ -60,13 +78,10 @@ parabank-tests/
     │   ├── account_details_page.py
     │   ├── transfer_funds_page.py
     │   └── bill_pay_page.py
-    ├── api/
-    │   └── test_customers.py
-    └── ui/
-        ├── test_login.py
-        ├── test_register.py
-        ├── test_cross_checks.py
-        └── test_bill_pay.py
+    ├── test_sign_in.py            # login, wrong logins, logout, register
+    ├── test_customer.py           # name, address, unknown ids, greeting
+    ├── test_account.py            # account rules, create, UI account checks
+    └── test_payment.py            # transfer, bill pay
 ## How to run
 
 > **Note about the public site:** parabank.parasoft.com is shared and sometimes unstable. Wrong-credential logins occasionally return "An internal error has occurred", and the site may block automated browsers. For reliable results, run against the Docker image (see "Run locally with Docker").

@@ -1,9 +1,8 @@
 from playwright.sync_api import Page, expect
 from pages.login_page import LoginPage
 from pages.overview_page import OverviewPage
+from pages.register_page import RegisterPage
 import pytest
-
-pytestmark = pytest.mark.ui
 
 def test_login_with_valid_user_shows_accounts_overview(page):
     login_page = LoginPage(page)
@@ -30,11 +29,8 @@ def test_invalid_login_credentials(page: Page, user, password, error):
     expect(login_page.error_heading).to_be_visible()
     expect(login_page.error_message).to_contain_text(error)
 
-
-
-
-
-                                                   
-
-
-
+def test_register_new_customer_shows_welcome(page, new_username):
+    register_page = RegisterPage(page)
+    register_page.open()
+    register_page.register(new_username, "Test12345")
+    expect (register_page.welcome_heading).to_have_text(f"Welcome {new_username}")
