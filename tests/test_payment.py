@@ -102,6 +102,21 @@ def test_deposit_funds_in_api_updates_account_in_ui(api, api_base_url, first_acc
     update = balance + amount
     expect(account_details.account_balance).to_have_text(f"${update:.2f}")
 
+def test_withdraw_funds_in_api_updates_account_in_ui(api, api_base_url, first_account, amount, overview, page):
+    account_id = first_account["id"]
+    balance = get_balance(api, api_base_url, account_id)
+    response = api.post(f"{api_base_url}/withdraw", params={
+        "accountId": account_id,
+        "amount": amount
+    })
+    expected = f"Successfully withdrew ${amount} from account #{account_id}"
+    assert response.text == expected
+    assert response.status_code == 200
+    assert get_balance(api, api_base_url, account_id) == pytest.approx(balance - amount)
+    overview.open_account(account_id)
+    account_details = AccountDetailsPage(page)
+    update = balance - amount
+    expect(account_details.account_balance).to_have_text(f"${update:.2f}")
 
 
 
